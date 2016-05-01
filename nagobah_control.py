@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 from getopt import getopt, GetoptError
+from utility.mongoHelper import MongoDBHelper
 
 
 def usage():
@@ -124,7 +125,7 @@ def main():
             else:
                 assert False, "Unhandled option"
 
-
+        cur = MongoDBHelper()
         if flag_l == 1 and flag_d == 0 and flag_e == 0:
             # 可以简化
             #type_ = "list"
@@ -132,15 +133,15 @@ def main():
             # 可以考虑使用* args了
             if flag_j == 1 and flag_t == 1:
                 check_exist(job_name, task_name)
-                present_a_task(job_name, task_name)
+                cur.present_a_task(job_name, task_name)
             elif flag_j == 1 and flag_t == 0:
                 check_exist(job_name)
-                present_a_job(job_name)
+                cur.present_a_job(job_name)
             elif flag_j == 0 and flag_t == 1:
                 print "必须指定所属的job"
                 sys.exit(1)
             else:
-                present_all_job()
+                cur.present_all_job()
 
         elif flag_l == 0 and flag_d == 1 and flag_e == 0:
 
