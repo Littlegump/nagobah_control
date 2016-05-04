@@ -7,66 +7,14 @@ import sys
 import subprocess
 from getopt import getopt, GetoptError
 from utility.mongoHelper import MongoDBHelper
+from termcolor import colored
 
 
-def usage():
-    print "usage()"
-    pass
 
 def check_exist(job_name,*args):
     for i in args:
         task_name = i
     pass
-
-
-def present_all_job():
-    pass
-
-
-def present_a_job(job_name):
-    print "你的job有好多tasks，显示起来可能会比较多，是否显示你的所有参数和tasks"
-    pass
-
-
-def present_a_task(job_name, task_name):
-    print "job的task"
-    pass
-
-def delete_all_job():
-    pass
-
-
-def delete_a_job(job_name):
-    print "job中有好多个tasks了，你确定删除该job的所有tasks"
-    pass
-
-
-def delete_a_task(job_name, task_name):
-    print "zhe个任务是,确定要删除吗"
-    pass
-
-
-def edit_a_job(job_name):
-    print "你的job有好多tasks，显示起来可能会比较多，是否显示你的所有参数和tasks"
-    pass
-
-
-def edit_a_task(job_name, task_name):
-    print "job的task"
-    pass
-
-
-def get_server_job_name():
-    """ 获取dagobah服务端的job_name列表"""
-
-    client = pymongo.MongoClient('mongodb://localhost', 27017)
-    db = client['dagobah']
-    collect = db['dagobah']
-    l1 = []
-    for item in collect.find():
-        for task in item['jobs']:
-            l1.append(task['name'])
-    return l1
 
 def usage():
     print """
@@ -146,26 +94,21 @@ def main():
         elif flag_l == 0 and flag_d == 1 and flag_e == 0:
 
             if flag_j == 1 and flag_t == 1:
-                check_exist(job_name, task_name)
-                delete_a_task(job_name, task_name)
+                cur.delete_a_task(job_name, task_name)
             elif flag_j == 1 and flag_t == 0:
-                check_exist(job_name)
-                delete_a_job(job_name)
+                cur.delete_a_job(job_name)
             elif flag_j == 0 and flag_t == 1:
                 print "必须指定所属的job"
                 sys.exit(1)
             else:
                 print "要不要删除所有的job"
-                delete_all_job()
-            pass
+                cur.delete_all_job()
 
         elif flag_l == 0 and flag_d == 0 and flag_e == 1:
 
             if flag_j == 1 and flag_t == 1:
-                check_exist(job_name, task_name)
                 edit_a_task(job_name, task_name)
             elif flag_j == 1 and flag_t == 0:
-                check_exist(job_name)
                 edit_a_job(job_name)
             elif flag_j == 0 and flag_t == 1:
                 print "必须指定所属的job"
