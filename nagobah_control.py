@@ -23,9 +23,8 @@ Usage: nagobah_control [options]
 Options:
     Operation:
         -h, --help            show help
-        -l, --list            Operate was definated as present a list
-        -d, --delete          Operate was definated as delete
-        -e, --edit            Operate was definated as edit
+        -l, --list            the operate was definated as present a list
+        -d, --delete          the operate was definated as delete
     Object:
         --jobname=JOBNAME     define a JOBNAME to Operate
         --taskname=TASK       define a TASK to Operate(JOBNAME is mandatory needed!)
@@ -45,6 +44,8 @@ def main():
                 sys.argv[1:],
                 'hlde',
                 [   'jobname=',
+                    'list',
+                    'delete',
                     'taskname=',
                     'help'
                 ])

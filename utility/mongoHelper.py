@@ -6,15 +6,7 @@ import pymongo
 import pprint
 import requests
 from termcolor import colored
-
-class requestHelper(object):
-    def __init__(self):
-        pass
-    def operate(self, url,):
-        ss = requests.session()
-        ss.post("http://localhost:9000/do-login", {'password': 'dagobah'})
-        ss.post(url, **kwargs)
-        pass
+import yaml
 
 
 class MongoDBHelper(object):
@@ -26,16 +18,30 @@ class MongoDBHelper(object):
 
 
     def login_to_dago(self):
-        ss = requests.session()
-        ss.post("http://localhost:9000/do-login", {"password": 'dagobah'})
+        try:
+            ss = requests.session()
+            ss.post("http://localhost:9000/do-login", {"password": 'dagobah'})
+        except requests.exceptions.ConnectionError:
+            print "登录失败，请检查服务启动情况"
+            sys.exit(1)
         return ss
 
 
     def connect_dagobah_mongo(self):
-        client = pymongo.MongoClient('mongodb://localhost', 27017)
+        stream = file('/root/.dagobahd.yml', 'rb')
+        data = yaml.load(stream)
+        host = data['MongoBackend']['host']
+        port = data['MongoBackend']['port']
+        try:
+            client = pymongo.MongoClient('mongodb://'+host, port)
+        except pymongo.errors.ConnectionFailure, err:
+            print "mongodb连接不上: "
+            print str(err)
+            sys.exit(1)
         db = client['dagobah']
         collect = db['dagobah']
         return collect
+
 
     def get_all_job_list(self):
         l1 = []
@@ -60,12 +66,13 @@ class MongoDBHelper(object):
 
     def present_all_job(self):
         print '{:2s} {:-4d} {:2s}'.format(colored('Total: ', 'blue'), len(self.iter_), colored('jobs included', 'blue'))
-        print "{:25s} {:20s} {:s}".format('<name>', '<num of tasks>', '<notes>')
+        print "{:25s} {:20s} {:20s} {:s}".format('<name>', '<num of tasks>', '<timezone>', '<notes>')
         for jobs in self.iter_:
-            print "{:25s} {:29s} {:10s}".format(
+            print "{:31s} {:23s} {:20s} {:10s}".format(
                     jobs['name'],
                     colored(len(jobs['tasks']), 'red'),
-                    jobs['notes'].strip())
+                    jobs['timezone'],
+                    jobs['notes'])
 
 
     def present_a_job(self, job_name):
@@ -76,9 +83,11 @@ class MongoDBHelper(object):
         pp = pprint.PrettyPrinter(indent=4)
         for jobs in self.iter_:
             if jobs['name'] == job_name:
-                for key in ['job_id', 'parent_id']:
+                for key in ['job_id', 'parent_id', 'status', 'next_run']:
                     del jobs[key]
-                # 这里使用pprint
+                for task in jobs['tasks']:
+                    for key in ['started_at', 'completed_at', 'soft_timeout', 'hard_timeout', 'hostname', 'success']:
+                        del task[key]
                 pp.pprint(jobs)
 
 
